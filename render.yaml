@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: tastedesk
+    runtime: python
+    plan: free
+    buildCommand: "echo no deps"
+    startCommand: "python3 server.py"
+    healthCheckPath: /health
+    envVars:
+      - key: QLOO_API_KEY
+        sync: false
