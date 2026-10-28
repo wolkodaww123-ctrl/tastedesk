@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TasteDesk - taste-aware AI concierge for small businesses</title>
+<style>body{font-family:system-ui,sans-serif;max-width:860px;margin:24px auto;padding:0 16px;color:#1d1d1f}
+h1{margin:0}.sub{color:#666;margin:4px 0 16px}.tabs button{padding:8px 14px;border:1px solid #ccc;background:#f5f5f7;border-radius:8px;cursor:pointer;margin-right:6px}
+.tabs button.on{background:#111;color:#fff}#log{border:1px solid #ddd;border-radius:12px;padding:12px;min-height:260px;background:#fafafa}
+.m{white-space:pre-wrap;margin:8px 0;padding:10px;border-radius:10px}.u{background:#dbeafe;margin-left:15%}.b{background:#fff;border:1px solid #eee;margin-right:10%}
+form{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}input{flex:1;padding:10px;border:1px solid #ccc;border-radius:8px;min-width:140px}
+button.go{padding:10px 18px;border:0;border-radius:8px;background:#e11d48;color:#fff}details{font-size:12px;color:#444}code{font-size:11px}
+.ex{font-size:13px;color:#2563eb;cursor:pointer;text-decoration:underline;margin-right:10px}</style></head><body>
+<h1>TasteDesk</h1><div class="sub">A website chatbot for cafes, restaurants and hotels that knows what your guests love - grounded in the Qloo taste graph.</div>
+<div class="tabs"><button id="t1" class="on" onclick="setMode('concierge')">Guest concierge</button><button id="t2" onclick="setMode('crowd')">Know your crowd (owner)</button></div>
+<p id="hint"></p><div id="log"></div>
+<form onsubmit="send(event)"><input id="city" value="Austin, TX" title="City"><input id="msg" style="flex:3" autocomplete="off"><button class="go">Send</button></form>
+<script>
+let mode='concierge';const ex={concierge:["I love Taylor Swift and Wes Anderson movies, looking for Italian dinner","I'm a fan of The Office and Radiohead, any brunch spot?"],crowd:["Olive Garden","Juniper"]};
+function setMode(m){mode=m;t1.className=m=='concierge'?'on':'';t2.className=m=='crowd'?'on':'';
+msg.placeholder=m=='concierge'?'Tell the concierge what you love and what you feel like eating':'Your business name (as on Google Maps)';
+hint.innerHTML='Try: '+ex[m].map(e=>`<span class="ex" onclick="msg.value=this.innerText">${e}</span>`).join('')}
+function add(t,c){const d=document.createElement('div');d.className='m '+c;d.textContent=t;log.appendChild(d);return d}
+async function send(e){e.preventDefault();const t=msg.value.trim();if(!t)return;add(t,'u');msg.value='';const w=add('Thinking with Qloo...','b');
+const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,mode,city:city.value,business:mode=='crowd'?t:''})});
+const j=await r.json();w.textContent=j.reply||j.error;if(j.trace){const d=document.createElement('details');d.innerHTML='<summary>Agent steps ('+j.trace.length+' Qloo calls)</summary>'+j.trace.map(s=>`<div><b>${s.tool}</b> <code>${JSON.stringify(s.args)}</code> -> ${s.result}</div>`).join('');w.appendChild(d)}}
+setMode('concierge');</script></body></html>
